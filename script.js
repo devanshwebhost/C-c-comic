@@ -4,8 +4,8 @@ const comicsList = [
         id: 'elara-the-warrior',
         title: 'Elara The Warrior',
         pages: 3, 
-        coverExt: 'png',
-        pageExt: 'png' // Pages are now saved as .png
+        coverExt: 'jpg',
+        pageExt: 'jpg' // Pages are now saved as .png
     }
 ];
 
