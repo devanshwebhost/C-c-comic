@@ -1,13 +1,25 @@
+/* --- Fantasy Pink Theme Variables --- */
+:root {
+    --bg-dark: #0f050d;
+    --card-bg: #1f0b1a;
+    --primary-pink: #ff2a85;
+    --glow-pink: rgba(255, 42, 133, 0.6);
+    --text-main: #ffe6f2;
+    --font-fantasy: 'Cinzel Decorative', cursive;
+    --font-text: 'Quicksand', sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #121212;
-    color: white;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at 50% 0%, #2a0a20 0%, transparent 70%);
+    color: var(--text-main);
+    font-family: var(--font-text);
     overflow-x: hidden;
 }
 
@@ -18,43 +30,59 @@ body {
 /* --- Library View --- */
 header {
     text-align: center;
-    padding: 2rem;
-    background: #1a1a1a;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    padding: 2.5rem;
+    background: transparent;
+    border-bottom: 2px solid var(--primary-pink);
+    box-shadow: 0 4px 20px var(--glow-pink);
+}
+
+header h1 {
+    font-family: var(--font-fantasy);
+    font-size: 3rem;
+    color: var(--primary-pink);
+    text-shadow: 0 0 15px var(--glow-pink);
+    letter-spacing: 2px;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 2rem;
-    padding: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2.5rem;
+    padding: 3rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .comic-card {
-    background: #1e1e1e;
-    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 42, 133, 0.2);
+    border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: all 0.4s ease;
     overflow: hidden;
+    position: relative;
 }
 
 .comic-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--primary-pink);
+    box-shadow: 0 10px 30px var(--glow-pink);
 }
 
 .comic-card img {
     width: 100%;
-    height: 300px;
+    height: 320px;
     object-fit: cover;
+    border-bottom: 2px solid rgba(255, 42, 133, 0.3);
 }
 
 .comic-card h3 {
-    padding: 1rem;
+    padding: 1.2rem;
     text-align: center;
-    font-size: 1.1rem;
+    font-family: var(--font-fantasy);
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    color: var(--text-main);
 }
 
 /* --- Reader View --- */
@@ -62,28 +90,51 @@ header {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    background: radial-gradient(circle at center, #1f0b1a 0%, var(--bg-dark) 100%);
 }
 
 .reader-toolbar {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 1rem 2rem;
-    background: #1a1a1a;
+    background: rgba(15, 5, 13, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--primary-pink);
     z-index: 100;
 }
 
-button {
-    background: #333;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s;
+.reader-controls {
+    display: flex;
+    gap: 10px;
 }
 
-button:hover { background: #555; }
+button {
+    background: linear-gradient(45deg, #cc005f, var(--primary-pink));
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-text);
+    box-shadow: 0 0 10px var(--glow-pink);
+    transition: all 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--primary-pink);
+}
+
+#lang-toggle {
+    background: linear-gradient(45deg, #4b0082, #8a2be2);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.6);
+}
+#lang-toggle:hover {
+    box-shadow: 0 0 20px rgba(138, 43, 226, 1);
+}
 
 /* Book and Page Animation */
 .book-container {
@@ -97,8 +148,8 @@ button:hover { background: #555; }
 }
 
 .page-wrapper {
-    perspective: 1500px; /* Gives 3D depth to the flip */
-    max-height: 80vh;
+    perspective: 1500px;
+    max-height: 85vh;
     display: flex;
     justify-content: center;
 }
@@ -106,37 +157,46 @@ button:hover { background: #555; }
 .page {
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
-    transform-origin: left center; /* Hinges from the left side like a book */
+    transform-origin: left center;
     position: relative;
-    transition-duration: 0.6s;
+    border-radius: 5px;
 }
 
 .page img {
-    max-height: 80vh;
+    max-height: 85vh;
     max-width: 100%;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    transition: transform 0.3s ease; /* For Zoom */
+    border-radius: 4px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.8);
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Flip Animations */
 .page.flip-next {
     transform: rotateY(-180deg) scale(0.95);
-    opacity: 0;
+    opacity: 0.3;
 }
 
 .page.flip-prev {
     transform: rotateY(180deg) scale(0.95);
-    opacity: 0;
+    opacity: 0.3;
 }
 
 .nav-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0,0,0,0.5);
-    font-size: 2rem;
+    background: rgba(255, 42, 133, 0.2);
+    border: 1px solid var(--primary-pink);
+    font-size: 1.5rem;
     padding: 1rem;
+    border-radius: 50%;
     z-index: 10;
+    backdrop-filter: blur(5px);
 }
+
+.nav-btn:hover {
+    background: var(--primary-pink);
+}
+
 #prev-page { left: 2rem; }
 #next-page { right: 2rem; }
