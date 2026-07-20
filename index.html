@@ -32,16 +32,28 @@
             </div>
         </div>
 
-        <div class="book-container">
-            <button id="prev-page" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
-            
+        <!-- Book Container is now the clickable area -->
+        <div class="book-container" id="book-container">
             <div class="page-wrapper">
                 <div id="page-element" class="page">
                     <img id="comic-image" src="" alt="Comic Page">
                 </div>
             </div>
-
-            <button id="next-page" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <!-- Tutorial Overlay (Only shows on first open) -->
+        <div id="tutorial-overlay" class="hidden">
+            <div class="tut-content">
+                <div class="tut-side tut-left">
+                    <i class="fas fa-hand-pointer"></i>
+                    <p>Tap Left for Previous</p>
+                </div>
+                <div class="tut-side tut-right">
+                    <i class="fas fa-hand-pointer"></i>
+                    <p>Tap Right for Next</p>
+                </div>
+            </div>
+            <p class="tut-dismiss">Tap anywhere to start reading</p>
         </div>
     </div>
 
