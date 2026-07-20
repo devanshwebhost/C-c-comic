@@ -181,22 +181,68 @@ button:hover {
     opacity: 0.3;
 }
 
-.nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 42, 133, 0.2);
-    border: 1px solid var(--primary-pink);
-    font-size: 1.5rem;
-    padding: 1rem;
-    border-radius: 50%;
-    z-index: 10;
-    backdrop-filter: blur(5px);
-}
-
-.nav-btn:hover {
-    background: var(--primary-pink);
-}
 
 #prev-page { left: 2rem; }
 #next-page { right: 2rem; }
+
+/* --- Click Zones & Tutorial Overlay --- */
+
+.book-container {
+    cursor: pointer; /* User ko feel hoga ki page clickable hai */
+}
+
+/* Tutorial UI */
+#tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 5, 13, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-main);
+}
+
+.tut-content {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    padding: 0 10%;
+    margin-bottom: 2rem;
+}
+
+.tut-side {
+    text-align: center;
+    font-family: var(--font-fantasy);
+    font-size: 1.5rem;
+    animation: pulseGlow 2s infinite;
+}
+
+.tut-side i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary-pink);
+}
+
+.tut-dismiss {
+    font-size: 1.2rem;
+    opacity: 0.7;
+    margin-top: 3rem;
+    background: rgba(255, 42, 133, 0.3);
+    padding: 10px 20px;
+    border-radius: 20px;
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(1); text-shadow: 0 0 10px var(--glow-pink); }
+    50% { transform: scale(1.1); text-shadow: 0 0 20px var(--primary-pink); }
+    100% { transform: scale(1); text-shadow: 0 0 10px var(--glow-pink); }
+}
+
+
+
