@@ -1,10 +1,9 @@
 // ==========================================
 // ⚙️ GITHUB API CONFIGURATION (YAHAN CHANGE KARO)
 // ==========================================
-const GITHUB_USERNAME = 'devanshwebhost'; // 👈 Apna GitHub Username yahan likho (e.g., 'rahul123')
-const GITHUB_REPO = 'C-c-comic'; // 👈 Apni Repository ka naam yahan likho (e.g., 'comic-website')
+const GITHUB_USERNAME = 'devanshwebhost'; 
+const GITHUB_REPO = 'C-c-comic'; 
 
-// Ab tumhe manually koi list nahi banani padegi!
 let comicsList = []; 
 
 // --- Universal Audios ---
@@ -18,7 +17,7 @@ let currentPage = 1;
 let currentZoom = 1;
 let currentLang = 'e'; 
 let isSoundEnabled = true;
-let pageAudio = null;
+let bgmAudio = null; // 👈 Ab yeh single BGM audio ban gaya hai
 
 // DOM Elements
 const libraryView = document.getElementById('library-view');
@@ -38,44 +37,60 @@ function formatTitleFromId(id) {
 }
 
 // ==========================================
-// 🚀 DYNAMIC FOLDER SCANNING (GITHUB API)
+// 🚀 DYNAMIC FOLDER SCANNING & OPTIMIZATION
 // ==========================================
 async function fetchComicsDynamically() {
-    comicGrid.innerHTML = '<h3 style="text-align:center; width:100%; color:var(--primary-pink);">Loading Magic... ✨</h3>';
+    comicGrid.innerHTML = '<h3 style="text-align:center; width:100%; color:var(--primary-pink);">Loading Magical Books... ✨</h3>';
     
     try {
-        // 1. GitHub API se 'comics' folder check karo
         const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/comics`);
-        if (!response.ok) throw new Error("GitHub Repo nahi mili. Username ya Repo name check karo.");
+        if (!response.ok) throw new Error("GitHub Repo nahi mili. API ya Folders check karo.");
         
         const data = await response.json();
-        
-        // 2. Sirf folders (directories) ko filter karo
         const folders = data.filter(item => item.type === 'dir');
-        comicsList = []; // Reset list
+        
+        comicsList = []; 
 
         for (let folder of folders) {
-            // 3. Har folder ke andar jaakar check karo kitne pages hain
+            // 1. Comic Folder ki files check karo
             const folderRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/comics/${folder.name}`);
             const folderData = await folderRes.json();
             
-            // '-e.png' wali files ko count karke total pages pata lagao
-            // Agar tumne image jpg me rakhi hai, toh '-e.png' ko '.jpg' se replace kar dena
-            const pageFiles = folderData.filter(file => file.name.includes('-e.')); 
-            const totalPages = pageFiles.length > 0 ? pageFiles.length : 1; // Default 1 page agar kuch na mile
+            // 2. Cover image dynamic extention check (.jpg, .png, .webp)
+            const coverFile = folderData.find(f => f.name.toLowerCase().startsWith('cover.'));
+            const coverName = coverFile ? coverFile.name : 'cover.jpg'; // agar nahi mili to default jpg
+            
+            // 3. Pages count aur unka extension detect karo
+            const englishPages = folderData.filter(file => file.name.includes('-e.')); 
+            const totalPages = englishPages.length > 0 ? englishPages.length : 1; 
+            const pageExt = englishPages.length > 0 ? englishPages[0].name.split('.').pop() : 'png';
+
+            // 4. Audio Folder me file scan karo
+            let audioFileName = null;
+            try {
+                const audioRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/comics/${folder.name}/audio`);
+                if (audioRes.ok) {
+                    const audioData = await audioRes.json();
+                    // Koi bhi audio file jo .mp3, .wav, ya .ogg me ho use utha lo
+                    const audioFile = audioData.find(f => f.name.match(/\.(mp3|wav|ogg)$/i));
+                    if (audioFile) audioFileName = audioFile.name;
+                }
+            } catch (e) {
+                console.log(`No audio found for ${folder.name}`);
+            }
 
             // Dynamic Data Push
             comicsList.push({
                 id: folder.name,
                 title: formatTitleFromId(folder.name),
                 pages: totalPages, 
-                coverExt: 'jpg', // Cover ke liye .jpg
-                pageExt: 'png'   // Pages ke liye .png (Agar jpg hai toh ise 'jpg' kar dena)
+                coverName: coverName, // Dynamic Cover Name
+                pageExt: pageExt,     // Dynamic Page Extension
+                audioName: audioFileName // Dynamic Audio Name
             });
         }
 
-        // Jab sab load ho jaye toh library start karo
-        comicGrid.innerHTML = ''; // Clear loading text
+        comicGrid.innerHTML = ''; 
         initLibrary();
 
     } catch (error) {
@@ -84,13 +99,13 @@ async function fetchComicsDynamically() {
     }
 }
 
-// 1. Initialize Library (Ab dynamic list se chalega)
+// 1. Initialize Library 
 function initLibrary() {
     comicsList.forEach(comic => {
         const card = document.createElement('div');
         card.className = 'comic-card';
         card.innerHTML = `
-            <img src="comics/${comic.id}/cover.${comic.coverExt}" alt="${comic.title}">
+            <img src="comics/${comic.id}/${comic.coverName}" alt="${comic.title}">
             <h3>${comic.title}</h3>
         `;
         card.addEventListener('click', () => openBook(comic));
@@ -98,7 +113,7 @@ function initLibrary() {
     });
 }
 
-// 2. Open Book & Load Local Storage
+// 2. Open Book & Play Background Music
 function openBook(comic) {
     currentComic = comic;
     currentZoom = 1;
@@ -112,6 +127,20 @@ function openBook(comic) {
     readerView.classList.remove('hidden');
     
     if (isSoundEnabled) openSound.play();
+
+    // 🎵 Dedicated Book Background Music Setup
+    if (bgmAudio) {
+        bgmAudio.pause();
+        bgmAudio.currentTime = 0;
+    }
+
+    if (comic.audioName) {
+        bgmAudio = new Audio(`comics/${comic.id}/audio/${comic.audioName}`);
+        bgmAudio.loop = true; // Audio loop par chalegi
+        if (isSoundEnabled) {
+            bgmAudio.play().catch(e => console.log("BGM Play error: ", e));
+        }
+    }
     
     loadPage();
     showTutorial();
@@ -131,21 +160,10 @@ function showTutorial() {
     }
 }
 
-// 4. Load Page & Audio
+// 4. Load Page (Ab yeh bas image load karega, audio nahi chherega)
 function loadPage() {
     comicImage.style.transform = `scale(${currentZoom})`;
-    
     comicImage.src = `comics/${currentComic.id}/${currentPage}-${currentLang}.${currentComic.pageExt}`;
-
-    if (pageAudio) {
-        pageAudio.pause();
-        pageAudio.currentTime = 0;
-    }
-
-    if (isSoundEnabled) {
-        pageAudio = new Audio(`comics/${currentComic.id}/audio/${currentPage}.mp3`);
-        pageAudio.play().catch(e => console.log("Audio not found: ", e));
-    }
 }
 
 // 5. Flip Logic (Left / Right)
@@ -214,7 +232,11 @@ document.getElementById('zoom-out').addEventListener('click', () => {
 document.getElementById('close-btn').addEventListener('click', () => {
     readerView.classList.add('hidden');
     libraryView.classList.remove('hidden');
-    if (pageAudio) pageAudio.pause();
+    
+    // Stop BGM when returning to library
+    if (bgmAudio) {
+        bgmAudio.pause();
+    }
 });
 
 // 9. Toggle Sound
@@ -224,12 +246,12 @@ document.getElementById('bgm-toggle').addEventListener('click', function() {
     
     if (isSoundEnabled) {
         icon.className = 'fas fa-volume-up';
-        if (pageAudio) pageAudio.play();
+        if (bgmAudio) bgmAudio.play();
     } else {
         icon.className = 'fas fa-volume-mute';
-        if (pageAudio) pageAudio.pause();
+        if (bgmAudio) bgmAudio.pause();
     }
 });
 
-// YAHAN SE SITE START HOGI API CALL KE SATH
+// Start fetching and loading
 fetchComicsDynamically();
