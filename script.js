@@ -17,7 +17,7 @@ let currentPage = 1;
 let currentZoom = 1;
 let currentLang = 'e'; 
 let isSoundEnabled = true;
-let bgmAudio = null; // 👈 Ab yeh single BGM audio ban gaya hai
+let bgmAudio = null;
 
 // DOM Elements
 const libraryView = document.getElementById('library-view');
@@ -56,14 +56,32 @@ async function fetchComicsDynamically() {
             const folderRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/comics/${folder.name}`);
             const folderData = await folderRes.json();
             
-            // 2. Cover image dynamic extention check (.jpg, .png, .webp)
-            const coverFile = folderData.find(f => f.name.toLowerCase().startsWith('cover.'));
-            const coverName = coverFile ? coverFile.name : 'cover.jpg'; // agar nahi mili to default jpg
+            // 2. Cover image dynamic extention check (jpg, jpeg, png, webp, gif)
+            const coverFile = folderData.find(f => f.name.toLowerCase().match(/^cover\.(jpg|jpeg|png|webp|gif)$/i));
+            const coverName = coverFile ? coverFile.name : 'cover.png'; 
             
-            // 3. Pages count aur unka extension detect karo
-            const englishPages = folderData.filter(file => file.name.includes('-e.')); 
-            const totalPages = englishPages.length > 0 ? englishPages.length : 1; 
-            const pageExt = englishPages.length > 0 ? englishPages[0].name.split('.').pop() : 'png';
+            // 3. Pages count aur unka extension detect karo (DYNAMIC PAGE EXTENSIONS)
+            const pagesMap = {};
+            let totalPages = 0;
+
+            folderData.forEach(file => {
+                // Ye check karega files jaise: 1-e.jpg, 2-h.png, 3-e.webp
+                const match = file.name.match(/^(\d+)-(e|h)\.(jpg|jpeg|png|webp)$/i);
+                if (match) {
+                    const pageNum = parseInt(match[1]);
+                    const lang = match[2].toLowerCase(); // 'e' or 'h'
+                    const ext = match[3]; // 'png', 'jpg', etc.
+
+                    if (!pagesMap[pageNum]) {
+                        pagesMap[pageNum] = {};
+                    }
+                    pagesMap[pageNum][lang] = ext; // Extension save kar lo
+
+                    if (pageNum > totalPages) {
+                        totalPages = pageNum;
+                    }
+                }
+            });
 
             // 4. Audio Folder me file scan karo
             let audioFileName = null;
@@ -71,7 +89,6 @@ async function fetchComicsDynamically() {
                 const audioRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/comics/${folder.name}/audio`);
                 if (audioRes.ok) {
                     const audioData = await audioRes.json();
-                    // Koi bhi audio file jo .mp3, .wav, ya .ogg me ho use utha lo
                     const audioFile = audioData.find(f => f.name.match(/\.(mp3|wav|ogg)$/i));
                     if (audioFile) audioFileName = audioFile.name;
                 }
@@ -84,9 +101,9 @@ async function fetchComicsDynamically() {
                 id: folder.name,
                 title: formatTitleFromId(folder.name),
                 pages: totalPages, 
-                coverName: coverName, // Dynamic Cover Name
-                pageExt: pageExt,     // Dynamic Page Extension
-                audioName: audioFileName // Dynamic Audio Name
+                coverName: coverName,
+                pagesMap: pagesMap,     // Har page ka apna extension store ho gaya
+                audioName: audioFileName 
             });
         }
 
@@ -128,16 +145,18 @@ function openBook(comic) {
     
     if (isSoundEnabled) openSound.play();
 
-    // 🎵 Dedicated Book Background Music Setup
+    // Dedicated Book Background Music Setup
     if (bgmAudio) {
+        bgmAudio.muted = true;
         bgmAudio.pause();
         bgmAudio.currentTime = 0;
     }
 
     if (comic.audioName) {
         bgmAudio = new Audio(`comics/${comic.id}/audio/${comic.audioName}`);
-        bgmAudio.loop = true; // Audio loop par chalegi
+        bgmAudio.loop = true; 
         if (isSoundEnabled) {
+            bgmAudio.muted = false;
             bgmAudio.play().catch(e => console.log("BGM Play error: ", e));
         }
     }
@@ -160,10 +179,16 @@ function showTutorial() {
     }
 }
 
-// 4. Load Page (Ab yeh bas image load karega, audio nahi chherega)
+// 4. Load Page (Image extension direct pagesMap se uthega)
 function loadPage() {
     comicImage.style.transform = `scale(${currentZoom})`;
-    comicImage.src = `comics/${currentComic.id}/${currentPage}-${currentLang}.${currentComic.pageExt}`;
+    
+    // Check karo is page aur language ka extension kya hai (default 'png')
+    const ext = currentComic.pagesMap[currentPage] && currentComic.pagesMap[currentPage][currentLang]
+                ? currentComic.pagesMap[currentPage][currentLang] 
+                : 'png';
+                
+    comicImage.src = `comics/${currentComic.id}/${currentPage}-${currentLang}.${ext}`;
 }
 
 // 5. Flip Logic (Left / Right)
@@ -235,21 +260,30 @@ document.getElementById('close-btn').addEventListener('click', () => {
     
     // Stop BGM when returning to library
     if (bgmAudio) {
+        bgmAudio.muted = true;
         bgmAudio.pause();
     }
 });
 
-// 9. Toggle Sound
+// 9. Toggle Sound (Fully Fixed for 100% Mute)
 document.getElementById('bgm-toggle').addEventListener('click', function() {
     isSoundEnabled = !isSoundEnabled;
     const icon = this.querySelector('i');
     
     if (isSoundEnabled) {
-        icon.className = 'fas fa-volume-up';
-        if (bgmAudio) bgmAudio.play();
+        if (icon) icon.className = 'fas fa-volume-up';
+        
+        if (bgmAudio) {
+            bgmAudio.muted = false;
+            bgmAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
+        }
     } else {
-        icon.className = 'fas fa-volume-mute';
-        if (bgmAudio) bgmAudio.pause();
+        if (icon) icon.className = 'fas fa-volume-mute';
+        
+        if (bgmAudio) {
+            bgmAudio.muted = true;
+            bgmAudio.pause();
+        }
     }
 });
 
