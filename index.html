@@ -10,6 +10,15 @@
 </head>
 <body>
 
+    <!-- ⏳ Preloader Overlay (Added) -->
+    <div id="loading-overlay" class="hidden">
+        <div class="loader-content">
+            <i class="fas fa-book-open loader-icon"></i>
+            <h2>Downloading Magic... ✨</h2>
+            <p id="loading-progress">0%</p>
+        </div>
+    </div>
+
     <!-- HOME: Library View -->
     <div id="library-view">
         <header>
@@ -23,7 +32,11 @@
     <!-- READER: Comic View -->
     <div id="reader-view" class="hidden">
         <div class="reader-toolbar">
-            <button id="close-btn" title="Close Book"><i class="fas fa-arrow-left"></i> Back</button>
+            <button id="close-btn" title="Close Book"><i class="fas fa-arrow-left"></i></button>
+            
+            <!-- 📖 Page Counter (New UX) -->
+            <div class="page-counter" id="page-counter">Page 1 / ?</div>
+
             <div class="reader-controls">
                 <button id="lang-toggle" title="Switch Language">EN</button>
                 <button id="zoom-out"><i class="fas fa-search-minus"></i></button>
@@ -41,15 +54,15 @@
             </div>
         </div>
         
-        <!-- Tutorial Overlay (Only shows on first open) -->
+        <!-- Tutorial Overlay -->
         <div id="tutorial-overlay" class="hidden">
             <div class="tut-content">
                 <div class="tut-side tut-left">
-                    <i class="fas fa-hand-pointer"></i>
+                    <i class="fas fa-hand-point-left"></i>
                     <p>Tap Left for Previous</p>
                 </div>
                 <div class="tut-side tut-right">
-                    <i class="fas fa-hand-pointer"></i>
+                    <i class="fas fa-hand-point-right"></i>
                     <p>Tap Right for Next</p>
                 </div>
             </div>
