@@ -159,7 +159,7 @@ async function preloadComicPages(comic) {
 async function openBook(comic) {
     currentComic = comic;
     currentZoom = 1;
-    currentLang = 'e'; 
+    currentLang = 'h'; 
     langToggleBtn.innerText = 'EN';
     
     const savedPage = localStorage.getItem(`progress_${comic.id}`);
