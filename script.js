@@ -67,7 +67,7 @@ async function fetchComicsDynamically() {
             let totalPages = 0;
 
             folderData.forEach(file => {
-                const match = file.name.match(/^(\d+)-(e|h)\.(jpg|jpeg|png|webp)$/i);
+                const match = file.name.match(/^(\d+)-(e|h)\.(jpg|jpeg|png|webp|heic)$/i);
                 if (match) {
                     const pageNum = parseInt(match[1]);
                     const lang = match[2].toLowerCase();
