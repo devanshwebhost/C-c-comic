@@ -15,7 +15,7 @@ const zoomSound = new Audio('universal-audios/zoom.mp3');
 let currentComic = null;
 let currentPage = 1;
 let currentZoom = 1;
-let currentLang = 'e'; 
+let currentLang = 'h'; 
 let isSoundEnabled = true;
 let bgmAudio = null;
 
